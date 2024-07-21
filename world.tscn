@@ -1,0 +1,91 @@
+[gd_scene load_steps=14 format=3 uid="uid://ddc2yx3wta88f"]
+
+[ext_resource type="Script" path="res://player.gd" id="1_h61ct"]
+[ext_resource type="Texture2D" uid="uid://dom2s76cponmh" path="res://autumn_field_puresky_4k.hdr" id="1_rkk04"]
+[ext_resource type="Texture2D" uid="uid://bxpkqfgxwgnp0" path="res://Textures/checker_blue_512x512.png" id="2_8p6eb"]
+[ext_resource type="Texture2D" uid="uid://2toxcfxhyuhv" path="res://Textures/grid_orange_512x512.png" id="3_ugqun"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_5xh1d"]
+panorama = ExtResource("1_rkk04")
+
+[sub_resource type="Sky" id="Sky_mgm0w"]
+sky_material = SubResource("PanoramaSkyMaterial_5xh1d")
+
+[sub_resource type="Environment" id="Environment_eimgl"]
+background_mode = 2
+sky = SubResource("Sky_mgm0w")
+tonemap_mode = 1
+tonemap_exposure = 0.68
+tonemap_white = 11.42
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eiybj"]
+albedo_texture = ExtResource("2_8p6eb")
+uv1_triplanar = true
+uv1_world_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7bmu3"]
+albedo_texture = ExtResource("3_ugqun")
+uv1_triplanar = true
+uv1_world_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_haan8"]
+albedo_texture = ExtResource("3_ugqun")
+uv1_triplanar = true
+uv1_world_triplanar = true
+
+[sub_resource type="PrismMesh" id="PrismMesh_cm1xr"]
+size = Vector3(2.605, 0.55, 0.92)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_a8lpl"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mq538"]
+
+[node name="World" type="Node"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_eimgl")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(0.885646, -0.459602, -0.0663189, -0.366236, -0.779139, 0.508737, -0.285488, -0.426272, -0.858364, 0, 0, 0)
+light_energy = 2.813
+
+[node name="Objects" type="Node3D" parent="."]
+transform = Transform3D(6.415, 0, 0, 0, 6.415, 0, 0, 0, 6.415, 0, 0, 0)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Objects"]
+material_override = SubResource("StandardMaterial3D_eiybj")
+use_collision = true
+size = Vector3(16, 0.0178223, 16)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.454102, 0.569092, 0)
+material_override = SubResource("StandardMaterial3D_7bmu3")
+use_collision = true
+size = Vector3(0.0917969, 1.14014, 3.71265)
+
+[node name="CSGMesh3D" type="CSGMesh3D" parent="Objects"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -1.40231, 0.279068, 0)
+material_override = SubResource("StandardMaterial3D_haan8")
+use_collision = true
+mesh = SubResource("PrismMesh_cm1xr")
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0486, 0)
+script = ExtResource("1_h61ct")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
+mesh = SubResource("CapsuleMesh_a8lpl")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+shape = SubResource("CapsuleShape3D_mq538")
+
+[node name="headTarget" type="Node3D" parent="."]
+transform = Transform3D(-0.761957, 0, 0.647628, 0, 1, 0, -0.647628, 0, -0.761957, 0, 1.53803, 0)
+
+[node name="cameraTarget" type="Node3D" parent="headTarget"]
+
+[node name="actualHead" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.56909, 0)
+
+[node name="actualCamera" type="Camera3D" parent="actualHead"]
+transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, 0, 0, 0)
