@@ -1,23 +1,37 @@
 extends CharacterBody3D
 
+@export_group("Movement")
+@export var WALK_SPEED : float = 5.0
+@export var CROUCH_SPEED : float = 2.0
+@export var SPRINT_SPEED : float = 8.0
+@export var JUMP_VELOCITY : float = 4.5
+@export var SENSITIVITY : float = 0.002
+@export var ACCELERATION : float = 10.0
+@export var AIR_STRAFE_ACCELERATION : float = 0.1
+@export var NORMAL_STRAFE_ACCELERATION : float = 2.0
 
-const WALK_SPEED := 6.0
-const CROUCH_SPEED := 2.0
-const SPRINT_SPEED := 12.0
-const JUMP_VELOCITY := 4.5
-const SENSITIVITY := 0.002
-const ACCELERATION := 10.0
-const AIR_STRAFE_ACCELERATION := 0.1
-const NORMAL_STRAFE_ACCELERATION := 2.0
-# dash parameters
-const DASH_SPEED := 20.0
-const DASH_DURATION := 0.3
-const DASH_COOLDOWN := 1.6
+@export_subgroup("Dash")
+@export var DASH_SPEED : float = 16.0
+@export var DASH_DURATION : float = 0.25
+@export var DASH_COOLDOWN : float = 2.5
+
+@export_subgroup("Slide")
+@export var SLIDE_SPEED : float = 12.0
+@export var SLIDE_DURATION : float = 0.9
+@export var SLIDE_COOLDOWN : float = 1.6
 
 var is_dashing := false
 var dash_timer := 0.0
 var dash_direction := Vector3.ZERO
 var dash_cooldown := 0.0
+
+
+var is_sliding := false
+var slide_timer := 0.0
+var slide_direction := Vector3.ZERO
+var slide_cooldown := 0.0
+
+
 var speed: float
 var acceleration := 2.0
 
@@ -69,8 +83,25 @@ func _physics_process(delta):
 	var input_dir = Input.get_vector("LEFT", "RIGHT", "FORWARD", "BACKWARD")
 	var direction = (actual_head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
+
+	if Input.is_action_just_pressed("CROUCH") && is_on_floor():
+		if slide_cooldown <= 0:
+			is_sliding = true
+			slide_direction = direction if direction != Vector3.ZERO else -head_target.transform.basis.z
+		else:
+			reset_slide()
+		
+	if Input.is_action_pressed("CROUCH") && is_on_floor() && is_sliding:
+		slide_timer -= delta
+		velocity = slide_direction.normalized() * SLIDE_SPEED
+	else:
+		is_sliding = false
+	if slide_timer <= 0 || (Input.is_action_just_released("CROUCH") && is_on_floor()):
+		reset_slide()
+	slide_cooldown -= delta
+	print(slide_cooldown)
 	# Handle dashing
-	if Input.is_action_just_pressed("DASH") and not is_dashing and dash_cooldown <= 0:
+	if Input.is_action_just_pressed("DASH") and not is_dashing and dash_cooldown <= 0 && !is_on_floor():
 		is_dashing = true
 		dash_timer = DASH_DURATION
 		
@@ -96,3 +127,7 @@ func _physics_process(delta):
 
 	move_and_slide()
 
+func reset_slide() -> void:
+	is_sliding = false
+	slide_cooldown = SLIDE_COOLDOWN
+	slide_timer = SLIDE_DURATION
