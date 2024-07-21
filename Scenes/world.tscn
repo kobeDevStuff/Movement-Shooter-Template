@@ -1,9 +1,10 @@
-[gd_scene load_steps=15 format=3 uid="uid://ddc2yx3wta88f"]
+[gd_scene load_steps=16 format=3 uid="uid://ddc2yx3wta88f"]
 
 [ext_resource type="Texture2D" uid="uid://dom2s76cponmh" path="res://Textures/autumn_field_puresky_4k.hdr" id="1_nutdr"]
 [ext_resource type="Texture2D" uid="uid://bxpkqfgxwgnp0" path="res://Textures/checker_blue_512x512.png" id="2_c5dl8"]
 [ext_resource type="Texture2D" uid="uid://2toxcfxhyuhv" path="res://Textures/grid_orange_512x512.png" id="3_v1xa5"]
 [ext_resource type="Script" path="res://Scripts/player.gd" id="4_as3yv"]
+[ext_resource type="PackedScene" uid="uid://bk0nfo5btjpxm" path="res://Scenes/pause_menu.tscn" id="5_o44si"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_5xh1d"]
 panorama = ExtResource("1_nutdr")
@@ -119,3 +120,5 @@ offset_right = 1152.0
 offset_bottom = 142.0
 theme = SubResource("Theme_n457q")
 horizontal_alignment = 2
+
+[node name="PauseMenu" parent="CanvasLayer" instance=ExtResource("5_o44si")]
