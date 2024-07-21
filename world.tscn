@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://ddc2yx3wta88f"]
+[gd_scene load_steps=15 format=3 uid="uid://ddc2yx3wta88f"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_h61ct"]
 [ext_resource type="Texture2D" uid="uid://dom2s76cponmh" path="res://autumn_field_puresky_4k.hdr" id="1_rkk04"]
@@ -39,6 +39,9 @@ size = Vector3(2.605, 0.55, 0.92)
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_a8lpl"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mq538"]
+
+[sub_resource type="Theme" id="Theme_n457q"]
+default_font_size = 35
 
 [node name="World" type="Node"]
 
@@ -89,3 +92,28 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.56909, 0)
 
 [node name="actualCamera" type="Camera3D" parent="actualHead"]
 transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, 0, 0, 0)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="CanvasLayer"]
+offset_left = 17.0
+offset_top = 19.0
+offset_right = 57.0
+offset_bottom = 68.0
+theme = SubResource("Theme_n457q")
+
+[node name="Label2" type="Label" parent="CanvasLayer"]
+offset_left = 757.0
+offset_top = 19.0
+offset_right = 1152.0
+offset_bottom = 68.0
+theme = SubResource("Theme_n457q")
+horizontal_alignment = 2
+
+[node name="Label3" type="Label" parent="CanvasLayer"]
+offset_left = 757.0
+offset_top = 93.0
+offset_right = 1152.0
+offset_bottom = 142.0
+theme = SubResource("Theme_n457q")
+horizontal_alignment = 2
