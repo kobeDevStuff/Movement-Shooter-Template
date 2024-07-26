@@ -1,14 +1,14 @@
 extends CharacterBody3D
-class_name PlayerController
 
+signal health_changed(health_value)
 
 @export_group("Camera")
 @export var base_fov : float = 80
 @export var dashing_fov_multiplier : float = 1.8
 @export var sliding_fov_multiplier : float = 1.6
-@export var max_fov : float = 130
-@export var min_fov : float = 60
-@export var camera_position_lerp : float = 0.999
+@export var max_fov : float = 120
+@export var min_fov : float = 70
+@export var camera_position_lerp : float = 6.0
 @export var camera_rotation_lerp : float = 0.999
 @export var normal_camera_fov_lerp : float = 0.2
 @export var SENSITIVITY : float = 0.002
@@ -54,67 +54,83 @@ var pickable : bool = false
 var speed: float
 var acceleration := 2.0
 
-var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+var gravity = 9.8
+var direction : Vector3 = Vector3.ZERO
 
-@onready var head_target = $headTarget
-@onready var camera_target = $headTarget/cameraTarget
-@onready var actual_head = $actualHead
-@onready var actual_camera = $actualHead/actualCamera
-@onready var collect_ray = $actualHead/actualCamera/CollectRay
+var health = 20
 
+@onready var animation_player = $AnimationPlayer
+@onready var head = $Head
+@onready var camera = $Head/Camera
+@onready var collect_ray = $Head/Camera/CollectRay
+@onready var shoot_ray = $Head/Camera/ShootRay
+@onready var muzzle_flash = $Head/Camera/Gun/MuzzleFlash
+@onready var speed_label = $CanvasLayer/SpeedLabel
+@onready var dash_label = $CanvasLayer/DashLabel
+@onready var slide_label = $CanvasLayer/SlideLabel
+@onready var crosshair = $CanvasLayer/GUI/Crosshair
+@onready var collect_label = $CanvasLayer/GUI/CollectLabel
+
+@onready var ball = preload("res://Scenes/item.tscn")
+
+func _enter_tree():
+	set_multiplayer_authority(str(name).to_int())
 
 func _ready():
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	if not is_multiplayer_authority(): return
+	
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	camera.current = true
 
 
 func _physics_process(delta):
+	if not is_multiplayer_authority(): return
 	apply_gravity(delta)
 	handle_movement_speeds(delta)
-	var direction = get_movement_dir()
+	direction = get_movement_dir()
 	handle_sliding(direction, delta)
 	handle_dashing(direction, delta)
 	apply_movement(direction, delta)
 	apply_jump()
 	handle_wall_running(direction, delta)
-	lerp_camera_transform()
 	normal_fov()
 	move_and_slide()
-	#update_text()
-	#spawn_item()
-	#handle_pickable()
-	#handle_item_pickup()
+	update_text()
+	spawn_item()
+	handle_pickable()
+	handle_item_pickup()
 
 
 #region camera
 func _unhandled_input(event):
+	if not is_multiplayer_authority(): return
+	
 	if event is InputEventMouseMotion:
-		head_target.rotate_y(-event.relative.x * SENSITIVITY)
-		camera_target.rotate_x(-event.relative.y * SENSITIVITY)
-		camera_target.rotation.x = clamp(camera_target.rotation.x, deg_to_rad(-80), deg_to_rad(80))
-
-
-func lerp_camera_transform() -> void:
-	actual_head.global_position = lerp(actual_head.global_position, head_target.global_position, camera_position_lerp)
-	actual_camera.rotation.x = lerp_angle(actual_camera.rotation.x, camera_target.rotation.x, camera_rotation_lerp)
-	actual_head.rotation.y = lerp_angle(actual_head.rotation.y, head_target.rotation.y, camera_rotation_lerp)
+		head.rotate_y(-event.relative.x * SENSITIVITY)
+		camera.rotate_x(-event.relative.y * SENSITIVITY)
+		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-80), deg_to_rad(80))
+	
+	if Input.is_action_just_pressed("SHOOT") \
+			and animation_player.current_animation != "shoot":
+		play_shoot_effects.rpc()
+		if shoot_ray.is_colliding():
+			var hit_player = shoot_ray.get_collider()
+			hit_player.receive_damage.rpc_id(hit_player.get_multiplayer_authority())
 
 func normal_fov():
 	var target_fov = base_fov * sqrt(get_real_velocity().length())/sqrt(SPRINT_SPEED) * normal_fov_multiplier
-	actual_camera.fov = lerp(actual_camera.fov, clamp(target_fov, min_fov ,max_fov), normal_camera_fov_lerp)
+	camera.fov = lerp(camera.fov, clamp(target_fov, min_fov ,max_fov), normal_camera_fov_lerp)
 
 func slide_fov():
 	var fov_tween = get_tree().create_tween()
-	await fov_tween.tween_property(actual_camera, "fov", clamp(base_fov * sliding_fov_multiplier, min_fov, max_fov), SLIDE_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	fov_tween.tween_property(actual_camera, "fov", actual_camera.fov, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	await fov_tween.tween_property(camera, "fov", clamp(base_fov * sliding_fov_multiplier, min_fov, max_fov), SLIDE_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	fov_tween.tween_property(camera, "fov", camera.fov, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func dash_fov():
 	var fov_tween = get_tree().create_tween()
-	await fov_tween.tween_property(actual_camera, "fov", clamp(base_fov * dashing_fov_multiplier, min_fov, max_fov), DASH_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	fov_tween.tween_property(actual_camera, "fov", actual_camera.fov, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	await fov_tween.tween_property(camera, "fov", clamp(base_fov * dashing_fov_multiplier, min_fov, max_fov), DASH_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	fov_tween.tween_property(camera, "fov", camera.fov, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
-
-func update_head_position(head_pos: Vector3) -> void:
-	head_target.position = head_pos
 #endregion
 
 
@@ -138,21 +154,21 @@ func apply_jump() -> void:
 func handle_movement_speeds(delta: float) -> void:
 	if Input.is_action_pressed("CROUCH"):
 		speed = CROUCH_SPEED
-		get_parent().update_head_position(Vector3(position.x, position.y - 0.5, position.z))
+		head.position.y = lerp(head.position.y, 0.25, camera_position_lerp * delta)
 	elif Input.is_action_pressed("SPRINT"):
 		speed = SPRINT_SPEED
-		get_parent().update_head_position(Vector3(position.x, position.y + 0.7, position.z))
+		head.position.y =  lerp(head.position.y, 0.6, camera_position_lerp * delta)
 	else:
 		speed = WALK_SPEED
-		get_parent().update_head_position(Vector3(position.x, position.y + 0.7, position.z))
+		head.position.y =  lerp(head.position.y, 0.6, camera_position_lerp * delta)
 
 func get_movement_dir() -> Vector3:
 	var input_dir = Input.get_vector("LEFT", "RIGHT", "FORWARD", "BACKWARD")
-	return (actual_head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	return (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 func apply_movement(direction: Vector3, delta: float) -> void:
 	if is_dashing:
-		velocity.y = JUMP_VELOCITY * sin(actual_camera.rotation.x)  # Apply a vertcal force with dash
+		velocity.y = JUMP_VELOCITY * sin(camera.rotation.x)  # Apply a vertcal force with dash
 	elif direction:
 		velocity.x = lerp(velocity.x, direction.x * speed, ACCELERATION * delta * acceleration)
 		velocity.z = lerp(velocity.z, direction.z * speed, ACCELERATION * delta * acceleration)
@@ -203,7 +219,7 @@ func handle_dashing(direction: Vector3, delta: float) -> void:
 		is_dashing = true
 		dash_timer = DASH_DURATION
 		
-		dash_direction = direction if direction != Vector3.ZERO else -actual_head.transform.basis.z
+		dash_direction = direction if direction != Vector3.ZERO else -head.transform.basis.z
 
 	if is_dashing:
 		dash_timer -= delta
@@ -223,51 +239,80 @@ func handle_wall_running(direction: Vector3, delta: float) -> void:
 	else:
 		gravity = NORMAL_GRAVITY
 		
+#endregion
 
+#region animations
+@rpc("call_local")
+func play_shoot_effects():
+	animation_player.stop()
+	animation_player.play("shoot")
+	muzzle_flash.restart()
+	muzzle_flash.emitting = true
 
+@rpc("any_peer")
+func receive_damage():
+	health -= 1
+	if health <= 0:
+		health = 3
+		position = Vector3.ZERO
+	health_changed.emit(health)
 
-##region debug
-#func update_text() -> void:
-	#if Input.is_action_just_pressed("DEBUG") && !debug:
-		#debug = true
-		#label.visible = true
-		#dash_label.visible = true
-		#slide_label.visible = true
-	#elif Input.is_action_just_pressed("DEBUG") && debug:
-		#debug = false
-		#label.visible = false
-		#dash_label.visible = false
-		#slide_label.visible = false
-	#label.text = str(snappedf(get_real_velocity().length(), 0.01))
-	#dash_label.text = "Dash cooldwon: " + str(snappedf(dash_cooldown, 0.1))
-	#slide_label.text = "Slide cooldown: " + str(snappedf(slide_cooldown, 0.1))
-#
-#func spawn_item() -> void:
-	#if Input.is_action_just_pressed("SPAWN_BALL"):
-		#var instance = ball.instantiate()
-		#get_tree().current_scene.add_child(instance)
-		#instance.global_position = Vector3(randf_range(-30, 30), randf_range(5,50),randf_range(-30, 30))
-##endregion
+func _on_animation_player_animation_finished(anim_name):
+	if anim_name == "shoot":
+		animation_player.play("idle")
 
-##region GUI
-#func check_if_hovering() -> bool:
-	#var intersecting = false
-	#if collect_ray.get_collider() is Item:
-		#intersecting = true
-	#return intersecting
-#
-#func handle_pickable() -> void:
-	#if check_if_hovering():
-		#pickable = true
-		#collect_label.visible = true
-		#crosshair.visible = false
-	#else:
-		#pickable = false
-		#crosshair.visible = true
-		#collect_label.visible = false
-#
-#func handle_item_pickup() -> void:
-	#if pickable && Input.is_action_just_pressed("PICKUP"):
-		#collect_ray.get_collider().queue_free()
-		#pickable = false
-##endregion
+func update_animations() -> void:
+	if animation_player.current_animation == "shoot":
+		pass
+	elif direction != Vector3.ZERO and is_on_floor():
+		animation_player.play("move")
+	else:
+		animation_player.play("idle")
+
+#endregion
+
+#region debug
+func update_text() -> void:
+	if Input.is_action_just_pressed("DEBUG") && !debug:
+		debug = true
+		speed_label.visible = true
+		dash_label.visible = true
+		slide_label.visible = true
+	elif Input.is_action_just_pressed("DEBUG") && debug:
+		debug = false
+		speed_label.visible = false
+		dash_label.visible = false
+		slide_label.visible = false
+	speed_label.text = str(snappedf(get_real_velocity().length(), 0.01))
+	dash_label.text = "Dash cooldwon: " + str(snappedf(dash_cooldown, 0.1))
+	slide_label.text = "Slide cooldown: " + str(snappedf(slide_cooldown, 0.1))
+
+func spawn_item() -> void:
+	if Input.is_action_just_pressed("SPAWN_BALL"):
+		var instance = ball.instantiate()
+		get_tree().current_scene.add_child(instance)
+		instance.global_position = Vector3(randf_range(-30, 30), randf_range(5,50),randf_range(-30, 30))
+#endregion
+
+#region GUI
+func check_if_hovering() -> bool:
+	var intersecting = false
+	if collect_ray.get_collider() is Item:
+		intersecting = true
+	return intersecting
+
+func handle_pickable() -> void:
+	if check_if_hovering():
+		pickable = true
+		collect_label.visible = true
+		crosshair.visible = false
+	else:
+		pickable = false
+		crosshair.visible = true
+		collect_label.visible = false
+
+func handle_item_pickup() -> void:
+	if pickable && Input.is_action_just_pressed("PICKUP"):
+		collect_ray.get_collider().queue_free()
+		pickable = false
+#endregion

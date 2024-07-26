@@ -1,6 +1,123 @@
-[gd_scene load_steps=5 format=3 uid="uid://bqxbkgyjqon8y"]
+[gd_scene load_steps=20 format=3 uid="uid://bqxbkgyjqon8y"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_lvfo2"]
+[ext_resource type="Texture2D" uid="uid://bp4bv05p3d3af" path="res://Assets/star_06.png" id="2_kgobs"]
+[ext_resource type="Texture2D" uid="uid://bhfdyc6feq62a" path="res://Textures/crosshair.png" id="3_jlpaa"]
+[ext_resource type="PackedScene" uid="uid://bk0nfo5btjpxm" path="res://Scenes/pause_menu.tscn" id="4_8xq8g"]
+
+[sub_resource type="Animation" id="Animation_i11r0"]
+resource_name = "shoot"
+length = 0.2
+step = 0.01
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Head/Camera/Gun:position:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(-0.389, -0.02, 0, 0.02, 0, -0.254, -0.02, 0, 0.02, 0, -0.389, -0.02, 0, 0.02, 0),
+"times": PackedFloat32Array(0.02, 0.08, 0.2)
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Head/Camera/Gun:position:z")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(-0.474, -0.02, 0, 0.02, 0, -0.364, -0.02, 0, 0.02, 0, -0.474, -0.02, 0, 0.02, 0),
+"times": PackedFloat32Array(0.02, 0.08, 0.2)
+}
+tracks/2/type = "bezier"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Head/Camera/Gun:rotation:x")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.02, 0, 0.286234, -0.02, 0, 0.02, 0, 0, -0.02, 0, 0.02, 0),
+"times": PackedFloat32Array(0, 0.07, 0.2)
+}
+
+[sub_resource type="Animation" id="Animation_abdx8"]
+resource_name = "move"
+length = 0.6
+loop_mode = 1
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Head/Camera/Gun:position:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(-0.389, -0.25, 0, 0.1, 0, -0.218, -0.1, 0, 0.1, 0, -0.389, -0.1, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 0.3, 0.6)
+}
+
+[sub_resource type="Animation" id="Animation_3lmsh"]
+resource_name = "idle"
+length = 3.0
+loop_mode = 1
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Head/Camera/Gun:position:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(-0.389, -0.25, 0, 0.6, 0, -0.319, -0.6, 0, 0.6, 0, -0.389, -0.6, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 1.5, 3)
+}
+
+[sub_resource type="Animation" id="Animation_wf7m6"]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Head/Camera/Gun:position:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(-0.389, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Head/Camera/Gun:rotation:x")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0.286234, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/2/type = "bezier"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Head/Camera/Gun:position:z")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(-0.364, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_upnyo"]
+_data = {
+"RESET": SubResource("Animation_wf7m6"),
+"idle": SubResource("Animation_3lmsh"),
+"move": SubResource("Animation_abdx8"),
+"shoot": SubResource("Animation_i11r0")
+}
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ftrds"]
 distance_fade_mode = 1
@@ -11,6 +128,41 @@ distance_fade_max_distance = 3.0
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mq538"]
 
+[sub_resource type="BoxMesh" id="BoxMesh_gas6l"]
+size = Vector3(0.2, 0.17, 0.66)
+
+[sub_resource type="Gradient" id="Gradient_nk4tt"]
+offsets = PackedFloat32Array(0, 0.142857, 1)
+colors = PackedColorArray(0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_51lyf"]
+gradient = SubResource("Gradient_nk4tt")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_tv1km"]
+angle_min = 45.0
+angle_max = 45.0
+gravity = Vector3(0, 0, 0)
+color_ramp = SubResource("GradientTexture1D_51lyf")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tosld"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(1, 0.921569, 0.458824, 1)
+albedo_texture = ExtResource("2_kgobs")
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_5pkpk"]
+material = SubResource("StandardMaterial3D_tosld")
+size = Vector2(0.7, 0.7)
+orientation = 2
+
+[sub_resource type="Theme" id="Theme_bqmum"]
+default_font_size = 35
+
 [node name="Player" type="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0486, 0)
 collision_layer = 2
@@ -19,6 +171,11 @@ floor_snap_length = 0.3
 platform_on_leave = 1
 script = ExtResource("1_lvfo2")
 
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_upnyo")
+}
+
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 material_override = SubResource("StandardMaterial3D_ftrds")
 mesh = SubResource("CapsuleMesh_a8lpl")
@@ -26,17 +183,106 @@ mesh = SubResource("CapsuleMesh_a8lpl")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_mq538")
 
-[node name="headTarget" type="Node3D" parent="."]
-transform = Transform3D(-0.761957, 0, 0.647628, 0, 1, 0, -0.647628, 0, -0.761957, 0, 0.48943, 0)
-
-[node name="cameraTarget" type="Node3D" parent="headTarget"]
-
-[node name="actualHead" type="Node3D" parent="."]
+[node name="Head" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.52049, 0)
 
-[node name="actualCamera" type="Camera3D" parent="actualHead"]
+[node name="Camera" type="Camera3D" parent="Head"]
 transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, 0, 0, 0)
 
-[node name="CollectRay" type="RayCast3D" parent="actualHead/actualCamera"]
+[node name="CollectRay" type="RayCast3D" parent="Head/Camera"]
 transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 0, 6.71148e-05, 0)
 target_position = Vector3(0, 0, -7)
+
+[node name="ShootRay" type="RayCast3D" parent="Head/Camera"]
+target_position = Vector3(0, 0, -300)
+
+[node name="Gun" type="Node3D" parent="Head/Camera"]
+transform = Transform3D(1, 0, 0, 0, 0.959314, -0.282341, 0, 0.282341, 0.959314, 0.561, -0.389, -0.364)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Head/Camera/Gun"]
+mesh = SubResource("BoxMesh_gas6l")
+
+[node name="MuzzleFlash" type="GPUParticles3D" parent="Head/Camera/Gun"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.429404)
+emitting = false
+amount = 1
+lifetime = 0.25
+one_shot = true
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_tv1km")
+draw_pass_1 = SubResource("PlaneMesh_5pkpk")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="SpeedLabel" type="Label" parent="CanvasLayer"]
+visible = false
+offset_left = 17.0
+offset_top = 19.0
+offset_right = 57.0
+offset_bottom = 68.0
+theme = SubResource("Theme_bqmum")
+
+[node name="DashLabel" type="Label" parent="CanvasLayer"]
+visible = false
+offset_left = 757.0
+offset_top = 19.0
+offset_right = 1152.0
+offset_bottom = 68.0
+theme = SubResource("Theme_bqmum")
+horizontal_alignment = 2
+
+[node name="SlideLabel" type="Label" parent="CanvasLayer"]
+visible = false
+offset_left = 757.0
+offset_top = 93.0
+offset_right = 1152.0
+offset_bottom = 142.0
+theme = SubResource("Theme_bqmum")
+horizontal_alignment = 2
+
+[node name="GUI" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CollectLabel" type="Label" parent="CanvasLayer/GUI"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -73.0
+offset_top = -11.5
+offset_right = 73.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Press [E] to pick up"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Crosshair" type="TextureRect" parent="CanvasLayer/GUI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 3.0
+offset_bottom = 3.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_jlpaa")
+stretch_mode = 3
+
+[node name="PauseMenu" parent="CanvasLayer" instance=ExtResource("4_8xq8g")]
+
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]
