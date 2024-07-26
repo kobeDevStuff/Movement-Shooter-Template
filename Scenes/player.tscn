@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=3 uid="uid://bqxbkgyjqon8y"]
+
+[ext_resource type="Script" path="res://Scripts/player.gd" id="1_lvfo2"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ftrds"]
+distance_fade_mode = 1
+distance_fade_min_distance = 3.0
+distance_fade_max_distance = 3.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_a8lpl"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mq538"]
+
+[node name="Player" type="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0486, 0)
+collision_layer = 2
+floor_max_angle = 1.0472
+floor_snap_length = 0.3
+platform_on_leave = 1
+script = ExtResource("1_lvfo2")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_ftrds")
+mesh = SubResource("CapsuleMesh_a8lpl")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_mq538")
+
+[node name="headTarget" type="Node3D" parent="."]
+transform = Transform3D(-0.761957, 0, 0.647628, 0, 1, 0, -0.647628, 0, -0.761957, 0, 0.48943, 0)
+
+[node name="cameraTarget" type="Node3D" parent="headTarget"]
+
+[node name="actualHead" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.52049, 0)
+
+[node name="actualCamera" type="Camera3D" parent="actualHead"]
+transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, 0, 0, 0)
+
+[node name="CollectRay" type="RayCast3D" parent="actualHead/actualCamera"]
+transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 0, 6.71148e-05, 0)
+target_position = Vector3(0, 0, -7)

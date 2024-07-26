@@ -41,3 +41,8 @@ func _on_options_pressed():
 	resume()
 	var options_scene = ResourceLoader.load_threaded_get(options_menu)
 	get_tree().change_scene_to_packed(options_scene)
+
+
+func _on_restart_pressed():
+	resume()
+	get_tree().reload_current_scene()

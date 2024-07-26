@@ -1,0 +1,99 @@
+[gd_scene load_steps=2 format=3 uid="uid://cjqjyv4ol67tu"]
+
+[ext_resource type="Script" path="res://Scripts/main_menu.gd" id="1_iuoin"]
+
+[node name="main_menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_iuoin")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -383.0
+offset_right = 383.0
+offset_bottom = 223.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 96
+text = "The Game Game"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 417.0
+offset_top = 417.0
+offset_right = -417.0
+offset_bottom = -68.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Play" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+text = "Play"
+
+[node name="Quit" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+text = "Quit"
+
+[node name="Submenu" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Submenu"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -15.5
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Host" type="Button" parent="Submenu/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+text = "Host Game"
+
+[node name="Join" type="Button" parent="Submenu/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+text = "Join Game"
+
+[node name="Practice" type="Button" parent="Submenu/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+text = "Practice Mode (solo)"
+
+[node name="Back" type="Button" parent="Submenu"]
+layout_mode = 0
+offset_top = 46.0
+offset_right = 87.0
+offset_bottom = 77.0
+text = "Back"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+
+[connection signal="pressed" from="VBoxContainer/Play" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="VBoxContainer/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="Submenu/HBoxContainer/Host" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="Submenu/HBoxContainer/Join" to="." method="_on_join_pressed"]
+[connection signal="pressed" from="Submenu/HBoxContainer/Practice" to="." method="_on_practice_pressed"]
+[connection signal="pressed" from="Submenu/Back" to="." method="_on_back_pressed"]
