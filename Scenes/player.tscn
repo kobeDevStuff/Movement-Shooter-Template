@@ -1,9 +1,23 @@
-[gd_scene load_steps=20 format=3 uid="uid://bqxbkgyjqon8y"]
+[gd_scene load_steps=21 format=3 uid="uid://bqxbkgyjqon8y"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_lvfo2"]
 [ext_resource type="Texture2D" uid="uid://bp4bv05p3d3af" path="res://Assets/star_06.png" id="2_kgobs"]
 [ext_resource type="Texture2D" uid="uid://bhfdyc6feq62a" path="res://Textures/crosshair.png" id="3_jlpaa"]
 [ext_resource type="PackedScene" uid="uid://bk0nfo5btjpxm" path="res://Scenes/pause_menu.tscn" id="4_8xq8g"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ujwt1"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath("Head:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath("Head/Camera:rotation")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath("Head:position")
+properties/3/spawn = true
+properties/3/replication_mode = 1
 
 [sub_resource type="Animation" id="Animation_i11r0"]
 resource_name = "shoot"
@@ -120,7 +134,6 @@ _data = {
 }
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ftrds"]
-distance_fade_mode = 1
 distance_fade_min_distance = 3.0
 distance_fade_max_distance = 3.0
 
@@ -171,6 +184,9 @@ floor_snap_length = 0.3
 platform_on_leave = 1
 script = ExtResource("1_lvfo2")
 
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_ujwt1")
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 "": SubResource("AnimationLibrary_upnyo")
@@ -195,6 +211,7 @@ target_position = Vector3(0, 0, -7)
 
 [node name="ShootRay" type="RayCast3D" parent="Head/Camera"]
 target_position = Vector3(0, 0, -300)
+collision_mask = 2
 
 [node name="Gun" type="Node3D" parent="Head/Camera"]
 transform = Transform3D(1, 0, 0, 0, 0.959314, -0.282341, 0, 0.282341, 0.959314, 0.561, -0.389, -0.364)

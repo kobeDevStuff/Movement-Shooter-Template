@@ -10,6 +10,8 @@ const Player = preload("res://Scenes/player.tscn")
 const PORT = 9999
 var enet_peer = ENetMultiplayerPeer.new()
 
+func _ready():
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 func _on_host_button_pressed():
 	main_menu.hide()

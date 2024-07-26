@@ -1,5 +1,5 @@
 extends CharacterBody3D
-
+class_name PlayerInstance
 signal health_changed(health_value)
 
 @export_group("Camera")
@@ -57,7 +57,10 @@ var acceleration := 2.0
 var gravity = 9.8
 var direction : Vector3 = Vector3.ZERO
 
-var health = 20
+const SPAWN_POS : Vector3 = Vector3(0,1,0)
+const MAX_HEALTH : int = 20
+
+var health = MAX_HEALTH
 
 @onready var animation_player = $AnimationPlayer
 @onready var head = $Head
@@ -88,11 +91,11 @@ func _physics_process(delta):
 	apply_gravity(delta)
 	handle_movement_speeds(delta)
 	direction = get_movement_dir()
-	handle_sliding(direction, delta)
-	handle_dashing(direction, delta)
-	apply_movement(direction, delta)
+	handle_sliding(delta)
+	handle_dashing(delta)
+	apply_movement(delta)
 	apply_jump()
-	handle_wall_running(direction, delta)
+	handle_wall_running()
 	normal_fov()
 	move_and_slide()
 	update_text()
@@ -113,7 +116,7 @@ func _unhandled_input(event):
 	if Input.is_action_just_pressed("SHOOT") \
 			and animation_player.current_animation != "shoot":
 		play_shoot_effects.rpc()
-		if shoot_ray.is_colliding():
+		if shoot_ray.is_colliding() && shoot_ray.get_collider() is PlayerInstance:
 			var hit_player = shoot_ray.get_collider()
 			hit_player.receive_damage.rpc_id(hit_player.get_multiplayer_authority())
 
@@ -123,12 +126,12 @@ func normal_fov():
 
 func slide_fov():
 	var fov_tween = get_tree().create_tween()
-	await fov_tween.tween_property(camera, "fov", clamp(base_fov * sliding_fov_multiplier, min_fov, max_fov), SLIDE_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	fov_tween.tween_property(camera, "fov", clamp(base_fov * sliding_fov_multiplier, min_fov, max_fov), SLIDE_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	fov_tween.tween_property(camera, "fov", camera.fov, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func dash_fov():
 	var fov_tween = get_tree().create_tween()
-	await fov_tween.tween_property(camera, "fov", clamp(base_fov * dashing_fov_multiplier, min_fov, max_fov), DASH_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	fov_tween.tween_property(camera, "fov", clamp(base_fov * dashing_fov_multiplier, min_fov, max_fov), DASH_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	fov_tween.tween_property(camera, "fov", camera.fov, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 #endregion
@@ -154,7 +157,7 @@ func apply_jump() -> void:
 func handle_movement_speeds(delta: float) -> void:
 	if Input.is_action_pressed("CROUCH"):
 		speed = CROUCH_SPEED
-		head.position.y = lerp(head.position.y, 0.25, camera_position_lerp * delta)
+		head.position.y = lerp(head.position.y, -0.1, camera_position_lerp * delta)
 	elif Input.is_action_pressed("SPRINT"):
 		speed = SPRINT_SPEED
 		head.position.y =  lerp(head.position.y, 0.6, camera_position_lerp * delta)
@@ -166,7 +169,7 @@ func get_movement_dir() -> Vector3:
 	var input_dir = Input.get_vector("LEFT", "RIGHT", "FORWARD", "BACKWARD")
 	return (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
-func apply_movement(direction: Vector3, delta: float) -> void:
+func apply_movement(delta: float) -> void:
 	if is_dashing:
 		velocity.y = JUMP_VELOCITY * sin(camera.rotation.x)  # Apply a vertcal force with dash
 	elif direction:
@@ -180,7 +183,7 @@ func apply_movement(direction: Vector3, delta: float) -> void:
 
 
 #region sliding
-func handle_sliding(direction: Vector3, delta: float) -> void:
+func handle_sliding(delta: float) -> void:
 	if Input.is_action_just_pressed("CROUCH") && (is_on_floor() || is_on_wall()) && get_real_velocity().length() > WALK_SPEED:
 		if slide_cooldown <= 0:
 			is_sliding = true
@@ -213,7 +216,7 @@ func reset_slide() -> void:
 
 
 #region dashing
-func handle_dashing(direction: Vector3, delta: float) -> void:
+func handle_dashing(delta: float) -> void:
 	if Input.is_action_just_pressed("DASH") && !is_dashing && dash_cooldown <= 0 && !is_on_floor():
 		dash_fov()
 		is_dashing = true
@@ -233,7 +236,7 @@ func handle_dashing(direction: Vector3, delta: float) -> void:
 
 
 #region wall running
-func handle_wall_running(direction: Vector3, delta: float) -> void:
+func handle_wall_running() -> void:
 	if is_on_wall() && is_sliding:
 		gravity = WALL_RUN_GRAVITY
 	else:
@@ -253,8 +256,8 @@ func play_shoot_effects():
 func receive_damage():
 	health -= 1
 	if health <= 0:
-		health = 3
-		position = Vector3.ZERO
+		health = MAX_HEALTH
+		position = SPAWN_POS
 	health_changed.emit(health)
 
 func _on_animation_player_animation_finished(anim_name):
@@ -313,6 +316,6 @@ func handle_pickable() -> void:
 
 func handle_item_pickup() -> void:
 	if pickable && Input.is_action_just_pressed("PICKUP"):
-		collect_ray.get_collider().queue_free()
+		collect_ray.get_collider().hide()
 		pickable = false
 #endregion

@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://c20l5p30dc2g1"]
+[gd_scene load_steps=8 format=3 uid="uid://c20l5p30dc2g1"]
 
 [ext_resource type="Script" path="res://Scripts/Item.gd" id="1_qydhb"]
 [ext_resource type="Texture2D" uid="uid://b202nymorxhan" path="res://Textures/checker_lime_512x512.png" id="2_bo7nx"]
@@ -15,10 +15,19 @@ uv1_triplanar = true
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_xbswe"]
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ny1dx"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:visible")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
 [node name="Item" type="RigidBody3D"]
 mass = 0.02
 physics_material_override = SubResource("PhysicsMaterial_e1sjq")
 can_sleep = false
+freeze_mode = 1
 script = ExtResource("1_qydhb")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
@@ -27,3 +36,6 @@ mesh = SubResource("SphereMesh_t3fxd")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_xbswe")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_ny1dx")

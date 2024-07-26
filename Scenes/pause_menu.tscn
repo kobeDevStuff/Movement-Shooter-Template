@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://bk0nfo5btjpxm"]
+[gd_scene load_steps=9 format=3 uid="uid://bk0nfo5btjpxm"]
 
 [ext_resource type="Script" path="res://Scripts/pause_menu.gd" id="1_8o08w"]
 [ext_resource type="Shader" path="res://Scripts/pause_menu.gdshader" id="2_lnosw"]
+[ext_resource type="PackedScene" uid="uid://c1otipp1vm2gq" path="res://Scenes/options_menu.tscn" id="3_frhv7"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dgtei"]
 shader = ExtResource("2_lnosw")
@@ -86,10 +87,14 @@ tracks/2/keys = {
 "values": [true]
 }
 
+[sub_resource type="Animation" id="Animation_1um7b"]
+resource_name = "options_in"
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_e1kd4"]
 _data = {
 "RESET": SubResource("Animation_anjc3"),
-"blur": SubResource("Animation_psjas")
+"blur": SubResource("Animation_psjas"),
+"options_in": SubResource("Animation_1um7b")
 }
 
 [node name="PauseMenu" type="Control"]
@@ -142,12 +147,6 @@ size_flags_horizontal = 4
 size_flags_vertical = 6
 text = "Options"
 
-[node name="Restart" type="Button" parent="PanelContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 6
-text = "Restart"
-
 [node name="Quit" type="Button" parent="PanelContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
@@ -159,7 +158,11 @@ libraries = {
 "": SubResource("AnimationLibrary_e1kd4")
 }
 
+[node name="OptionsMenu" parent="." instance=ExtResource("3_frhv7")]
+layout_mode = 1
+offset_left = 1152.0
+offset_right = 1152.0
+
 [connection signal="pressed" from="PanelContainer/VBoxContainer/Resume" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/Options" to="." method="_on_options_pressed"]
-[connection signal="pressed" from="PanelContainer/VBoxContainer/Restart" to="." method="_on_restart_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
